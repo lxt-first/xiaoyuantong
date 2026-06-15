@@ -15,7 +15,8 @@ const app = express();
 const PORT = process.env.PORT ?? 3001;
 
 // Middleware
-app.use(cors());
+const clientUrl = process.env.CLIENT_URL;
+app.use(cors(clientUrl ? { origin: clientUrl } : {}));
 app.use(express.json({ limit: "100kb" }));
 
 // Global rate limit: 100 requests per minute per IP

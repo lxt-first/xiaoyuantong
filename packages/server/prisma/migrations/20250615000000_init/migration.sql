@@ -16,9 +16,6 @@ CREATE TABLE "users" (
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
-CREATE UNIQUE INDEX "users_phone_key" ON "users"("phone");
-CREATE UNIQUE INDEX "users_edu_email_key" ON "users"("edu_email");
-
 -- CreateTable
 CREATE TABLE "verification_codes" (
     "id" TEXT NOT NULL,
@@ -44,8 +41,6 @@ CREATE TABLE "images" (
 
     CONSTRAINT "images_pkey" PRIMARY KEY ("id")
 );
-
-CREATE INDEX "images_kind_owner_id_idx" ON "images"("kind", "owner_id");
 
 -- CreateTable
 CREATE TABLE "referrals" (
@@ -159,8 +154,6 @@ CREATE TABLE "favorites" (
     CONSTRAINT "favorites_pkey" PRIMARY KEY ("id")
 );
 
-CREATE UNIQUE INDEX "favorites_user_id_target_type_target_id_key" ON "favorites"("user_id", "target_type", "target_id");
-
 -- CreateTable
 CREATE TABLE "reports" (
     "id" TEXT NOT NULL,
@@ -189,23 +182,45 @@ CREATE TABLE "notifications" (
     CONSTRAINT "notifications_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateIndex
+CREATE UNIQUE INDEX "users_phone_key" ON "users"("phone");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_edu_email_key" ON "users"("edu_email");
+
+-- CreateIndex
+CREATE INDEX "images_kind_owner_id_idx" ON "images"("kind", "owner_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "favorites_user_id_target_type_target_id_key" ON "favorites"("user_id", "target_type", "target_id");
+
 -- AddForeignKey
 ALTER TABLE "verification_codes" ADD CONSTRAINT "verification_codes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "referrals" ADD CONSTRAINT "referrals_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "interviews" ADD CONSTRAINT "interviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "rentals" ADD CONSTRAINT "rentals_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "secondhands" ADD CONSTRAINT "secondhands_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "food_reviews" ADD CONSTRAINT "food_reviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "exams" ADD CONSTRAINT "exams_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "favorites" ADD CONSTRAINT "favorites_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "reports" ADD CONSTRAINT "reports_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
