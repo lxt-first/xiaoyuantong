@@ -4,9 +4,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/server/package.json ./packages/server/package.json
 COPY tsconfig.base.json ./
-RUN npm install --ignore-scripts
+RUN npm install
 COPY . .
-RUN cd packages/server && ../../node_modules/.bin/prisma generate --schema=./prisma/schema.prisma
+RUN cd packages/server && npx prisma@5.22.0 generate --schema=./prisma/schema.prisma
 RUN npm run build -w packages/server
 
 FROM node:22-alpine
@@ -19,6 +19,6 @@ COPY --from=builder /app/packages/server/prisma ./packages/server/prisma
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/tsconfig.base.json ./
 WORKDIR /app/packages/server
-RUN ../../node_modules/.bin/prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma@5.22.0 generate --schema=./prisma/schema.prisma
 EXPOSE 3001
 CMD ["node", "dist/index.js"]
