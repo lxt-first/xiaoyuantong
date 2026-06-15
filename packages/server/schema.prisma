@@ -1,9 +1,9 @@
-generator client {
+﻿generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,8 +13,191 @@ model User {
   nickname  String   @default("")
   avatar    String   @default("")
   role      String   @default("user")
+  eduEmail  String?  @unique @map("edu_email")
+  school    String?
+  major     String?
+  certified Boolean  @default(false) @map("is_certified")
+  bio       String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  verificationCodes VerificationCode[]
+  referrals          Referral[]
+  interviews         Interview[]
+  rentals            Rental[]
+  secondhands        Secondhand[]
+  foodReviews        FoodReview[]
+  exams              Exam[]
+  favorites          Favorite[]
+  reports            Report[]
+  notifications      Notification[]
+
   @@map("users")
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  target    String
+  code      String
+  type      String
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("verification_codes")
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  kind      String
+  ownerId   String   @map("owner_id")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([kind, ownerId])
+  @@map("images")
+}
+
+model Referral {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id])
+  company      String
+  position     String
+  referralCode String?  @map("referral_code")
+  description  String?
+  deadline     String?
+  status       String   @default("active")
+  viewCount    Int      @default(0) @map("view_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("referrals")
+}
+
+model Interview {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  title      String
+  company    String
+  position   String
+  round      String?
+  passed     Boolean?
+  experience String
+  questions  String?
+  viewCount  Int      @default(0) @map("view_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("interviews")
+}
+
+model Rental {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  area        String
+  community   String?
+  price       Float
+  layout      String?
+  size        Float?
+  description String?
+  contact     String?
+  status      String   @default("active")
+  viewCount   Int      @default(0) @map("view_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("rentals")
+}
+
+model Secondhand {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+  category    String
+  title       String
+  price       Float
+  description String?
+  campus      String?
+  status      String   @default("active")
+  viewCount   Int      @default(0) @map("view_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("secondhands")
+}
+
+model FoodReview {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  restaurant String
+  rating     Int
+  review     String
+  viewCount  Int      @default(0) @map("view_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("food_reviews")
+}
+
+model Exam {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  category  String
+  content   String
+  subject   String?
+  viewCount Int      @default(0) @map("view_count")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("exams")
+}
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  targetType String   @map("target_type")
+  targetId   String   @map("target_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, targetType, targetId])
+  @@map("favorites")
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  targetType String   @map("target_type")
+  targetId   String   @map("target_id")
+  reason     String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("reports")
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  type       String
+  title      String
+  content    String
+  read       Boolean  @default(false)
+  targetType String?  @map("target_type")
+  targetId   String?  @map("target_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
 }

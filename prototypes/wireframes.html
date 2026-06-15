@@ -1,0 +1,258 @@
+<!DOCTYPE html><html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校园通 - 低保真原型</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter","PingFang SC","Microsoft YaHei",sans-serif;background:#e8e8e8;color:#333}
+.screen-nav{position:sticky;top:0;z-index:100;background:#2563EB;display:flex;overflow-x:auto;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.screen-nav a{display:block;padding:12px 20px;color:rgba(255,255,255,.75);text-decoration:none;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent}
+.screen-nav a:hover,.screen-nav a.active{color:#fff;border-bottom-color:#fff;background:rgba(255,255,255,.1)}
+.note-banner{background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;text-align:center;padding:10px 24px;font-size:13px;max-width:800px;margin:0 auto;border-radius:0 0 8px 8px}
+.screen-card{background:#fff;margin:24px auto;max-width:800px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}
+.header-bar{background:#2563EB;color:#fff;padding:12px 24px;font-size:14px;font-weight:600;letter-spacing:.5px}
+.prototype-container{margin:0 auto;background:#f5f5f5;position:relative}
+.screen-label{text-align:center;padding:16px 24px 8px;font-size:11px;color:#999;letter-spacing:1px;text-transform:uppercase}
+.wf-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:#fff;border-bottom:1px solid #eee}
+.wf-bar-title{font-size:16px;font-weight:600}
+.wf-bar-action{font-size:13px;color:#2563EB}
+.wf-tabs{display:flex;background:#fff;border-bottom:1px solid #eee;overflow-x:auto}
+.wf-tab{padding:10px 24px;font-size:13px;white-space:nowrap;border-bottom:2px solid transparent}
+.wf-tab.active{border-bottom-color:#2563EB;color:#2563EB;font-weight:600}
+.wf-feed{padding:12px 24px}
+.wf-card{background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid #eee;display:flex;gap:12px}
+.wf-card-tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;margin-bottom:6px}
+.wf-card-tag.career{background:#DBEAFE;color:#2563EB}
+.wf-card-tag.rental{background:#DCFCE7;color:#16A34A}
+.wf-card-tag.secondhand{background:#FEE2E2;color:#DC2626}
+.wf-card-tag.life{background:#FEF3C7;color:#D97706}
+.wf-card-body{flex:1}
+.wf-card-title{font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.4}
+.wf-card-desc{font-size:12px;color:#888;margin-bottom:4px}
+.wf-card-time{font-size:11px;color:#bbb}
+.wf-card-thumb{width:72px;height:72px;background:#e5e5e5;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa}
+.wf-bottom-nav{display:flex;background:#fff;border-top:1px solid #eee}
+.wf-nav-item{flex:1;text-align:center;padding:8px 0;font-size:10px;color:#999}
+.wf-nav-item.active{color:#2563EB}
+.wf-nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+.wf-nav-item.plus .icon{width:40px;height:40px;background:#2563EB;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;margin:-16px auto 2px;font-size:20px}
+.wf-search{margin:12px 24px;background:#f0f0f0;border-radius:8px;padding:10px 14px;font-size:13px;color:#aaa}
+.wf-list-item{background:#fff;padding:16px 24px;border-bottom:1px solid #f0f0f0}
+.wf-list-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.wf-list-meta{font-size:12px;color:#888;margin-bottom:2px}
+.wf-list-time{font-size:11px;color:#bbb}
+.wf-detail-header{background:#e5e5e5;height:200px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#aaa}
+.wf-detail-body{padding:20px 24px}
+.wf-detail-title{font-size:18px;font-weight:600;margin-bottom:8px}
+.wf-detail-price{font-size:22px;font-weight:700;color:#DC2626;margin-bottom:12px}
+.wf-detail-desc{font-size:13px;color:#666;line-height:1.6;margin-bottom:16px}
+.wf-detail-author{background:#f9f9f9;border-radius:8px;padding:14px;display:flex;align-items:center;gap:10px;margin:0 24px}
+.wf-author-avatar{width:44px;height:44px;background:#ddd;border-radius:50%;flex-shrink:0}
+.wf-author-info{font-size:13px}
+.wf-author-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;background:#DCFCE7;color:#16A34A;margin-top:2px}
+.wf-bottom-action{display:flex;background:#fff;border-top:1px solid #eee;padding:12px 24px;gap:12px}
+.wf-btn{flex:1;height:44px;border-radius:8px;font-size:14px;font-weight:600;border:none}
+.wf-btn.outline{background:#fff;border:1px solid #ddd;color:#333}
+.wf-btn.primary{background:#2563EB;color:#fff}
+.wf-form{padding:16px 24px}
+.wf-form-label{font-size:13px;font-weight:600;margin:16px 0 6px}
+.wf-form-label:first-child{margin-top:0}
+.wf-form-input{width:100%;height:44px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;background:#fff}
+.wf-form-textarea{width:100%;border:1px solid #ddd;border-radius:8px;padding:12px;font-size:14px;background:#fff;min-height:80px;resize:none}
+.wf-form-photos{display:flex;gap:8px}
+.wf-form-photo{width:80px;height:80px;background:#f0f0f0;border:1px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#bbb}
+.wf-stars{font-size:28px;color:#F59E0B;letter-spacing:4px}
+.wf-stars .empty{color:#ddd}
+.wf-profile-header{text-align:center;padding:32px 24px 20px;background:#fff}
+.wf-avatar-lg{width:80px;height:80px;background:#ddd;border-radius:50%;margin:0 auto 12px}
+.wf-profile-name{font-size:18px;font-weight:600}
+.wf-profile-school{font-size:13px;color:#888;margin-top:2px}
+.wf-stats{display:flex;margin-top:16px}
+.wf-stat{flex:1;text-align:center}
+.wf-stat-num{font-size:20px;font-weight:700}
+.wf-stat-label{font-size:11px;color:#888}
+.wf-modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end}
+.wf-modal{background:#fff;border-radius:12px 12px 0 0;padding:20px 24px 32px;width:100%}
+.wf-modal-title{font-size:16px;font-weight:600;text-align:center;margin-bottom:16px}
+.wf-modal-option{padding:14px;border-bottom:1px solid #f0f0f0;font-size:15px}
+</style>
+</head>
+<body>
+
+<div class="screen-nav">
+<a href="#s-home" class="active">首页</a>
+<a href="#s-career">校招列表</a>
+<a href="#s-detail">详情页</a>
+<a href="#s-publish">发布美食</a>
+<a href="#s-modal">发布模块选择</a>
+<a href="#s-profile">个人主页</a>
+</div>
+
+<div class="note-banner">🏫 校园通 · 低保真原型 — 共 6 个屏幕，点击上方标签快速跳转</div>
+<div class="screen-card" id="s-home">
+<div class="header-bar">首页 (信息流)</div>
+<div class="screen-label">Screen 1 · 首页 (信息流)</div>
+<div class="wf-bar">
+<div class="wf-bar-title">🏫 校园通</div>
+<div style="font-size:12px;color:#888;">浙江大学 ▾</div>
+</div>
+<div class="wf-tabs">
+<div class="wf-tab active">全部</div>
+<div class="wf-tab">校招</div>
+<div class="wf-tab">租房</div>
+<div class="wf-tab">二手</div>
+<div class="wf-tab">生活</div>
+</div>
+<div class="wf-feed">
+<div class="wf-card"><div class="wf-card-body"><span class="wf-card-tag secondhand">二手</span><div class="wf-card-title">几乎全新数据结构教材 ￥15</div><div class="wf-card-desc">紫金港校区 · 计算机专业适用</div><div class="wf-card-time">2小时前</div></div><div class="wf-card-thumb">📷 教材</div></div>
+<div class="wf-card"><div class="wf-card-body"><span class="wf-card-tag life">美食</span><div class="wf-card-title">紫金港食堂三楼麻辣烫 𫔄.2</div><div class="wf-card-desc">汤底浓郁，食材新鲜，性价比高</div><div class="wf-card-time">3小时前</div></div><div class="wf-card-thumb">📷 美食</div></div>
+<div class="wf-card"><div class="wf-card-body"><span class="wf-card-tag career">校招</span><div class="wf-card-title">字节跳动 后端开发实习生内推</div><div class="wf-card-desc">张三 · 计算机学院 · 有效期򁼶/30</div><div class="wf-card-time">5小时前</div></div></div>
+<div class="wf-card"><div class="wf-card-body"><span class="wf-card-tag rental">租房</span><div class="wf-card-title">紫金港周边单间转租 ￥1200/月</div><div class="wf-card-desc">1񛩀厅 · 步行10分钟到校</div><div class="wf-card-time">6小时前</div></div><div class="wf-card-thumb">📷 房间</div></div>
+</div>
+<div class="wf-bottom-nav">
+<div class="wf-nav-item active"><span class="icon">🏠</span>首页</div>
+<div class="wf-nav-item"><span class="icon">💼</span>求职</div>
+<div class="wf-nav-item plus"><span class="icon">+</span>发布</div>
+<div class="wf-nav-item"><span class="icon">🔔</span>消息</div>
+<div class="wf-nav-item"><span class="icon">👤</span>我的</div>
+</div>
+</div>
+<div class="screen-card" id="s-career">
+<div class="header-bar">校招内推列表</div>
+<div class="screen-label">Screen 2 · 校招内推列表</div>
+<div class="wf-bar">
+<div style="font-size:13px;color:#2563EB;">← 返回</div>
+<div class="wf-bar-title">校招内推</div>
+<div style="width:40px;"></div>
+</div>
+<div class="wf-tabs">
+<div class="wf-tab active">内推信息</div>
+<div class="wf-tab">面经/笔试</div>
+</div>
+<div class="wf-search">🔍 搜索公司/岗位...</div>
+<div class="wf-list-item"><div class="wf-list-title">字节跳动 后端开发实习生</div><div class="wf-list-meta">发布者：张三 · 计算机学院</div><div class="wf-list-meta">内推码󿆫T2026XYZ · 有效期򁼶/30</div><div class="wf-list-time">2小时前</div></div>
+<div class="wf-list-item"><div class="wf-list-title">阿里巴巴 前端工程师校招</div><div class="wf-list-meta">发布者：李四 · 软件学院</div><div class="wf-list-meta">直推部门：淘宝技术部</div><div class="wf-list-time">1天前</div></div>
+<div class="wf-list-item"><div class="wf-list-title">腾讯 产品经理实习生</div><div class="wf-list-meta">发布者：王五 · 经管学院</div><div class="wf-list-time">2天前</div></div>
+</div>
+<div class="screen-card" id="s-detail">
+<div class="header-bar">二手物品详情</div>
+<div class="screen-label">Screen 3 · 二手物品详情</div>
+<div class="wf-bar">
+<div style="font-size:13px;color:#2563EB;">← 返回</div>
+<div style="font-size:13px;color:#888;">···</div>
+</div>
+<div class="wf-detail-header">📷 图片轮播区 (可左右滑动)</div>
+<div class="wf-detail-body">
+<span class="wf-card-tag secondhand">二手</span> <span class="wf-card-tag" style="background:#f0f0f0;color:#888;">书本</span>
+<div class="wf-detail-title">几乎全新的数据结构教材</div>
+<div class="wf-detail-price">￥15</div>
+<div class="wf-detail-desc">大三时候买的，基本没怎么翻过。适合计算机专业同学参考使用。书况良好，无笔记无折痕。</div>
+<div style="font-size:13px;color:#888;margin-bottom:16px;">📍 交易地点：紫金港校区</div>
+</div>
+<div class="wf-detail-author">
+<div class="wf-author-avatar"></div>
+<div class="wf-author-info">
+<div style="font-weight:600;">王五</div>
+<div style="color:#888;">浙江大学 · 计算机学院</div>
+<span class="wf-author-badge">✓ 已认证学生</span>
+</div>
+</div>
+<div class="wf-bottom-action">
+<button class="wf-btn outline">☆ 收藏</button>
+<button class="wf-btn primary">📋 复制联系方式</button>
+</div>
+</div>
+<div class="screen-card" id="s-publish">
+<div class="header-bar">发布美食推荐</div>
+<div class="screen-label">Screen 4 · 发布美食推荐</div>
+<div class="wf-bar">
+<div style="font-size:13px;color:#DC2626;">✕ 取消</div>
+<div class="wf-bar-title">发布美食推荐</div>
+<div class="wf-bar-action">发布 →</div>
+</div>
+<div class="wf-form">
+<div class="wf-form-label">餐厅/档口名 *</div>
+<input class="wf-form-input" placeholder="例如：紫金港食堂三楼 重庆小面" readonly>
+<div class="wf-form-label">评分 *</div>
+<div class="wf-stars">★ ★ ★ ★ <span class="empty">★</span></div>
+<div class="wf-form-label">添加照片 (最񙆩张)</div>
+<div class="wf-form-photos"><div class="wf-form-photo">📷</div><div class="wf-form-photo"></div><div class="wf-form-photo"></div></div>
+<div class="wf-form-label">评价 *</div>
+<textarea class="wf-form-textarea" placeholder="说说这家店怎么样..." readonly></textarea>
+</div>
+</div>
+<div class="screen-card" id="s-modal">
+<div class="header-bar">发布模块选择</div>
+<div class="prototype-container" style="position:relative;">
+<div class="screen-label">Screen 5 · 发布模块选择</div>
+<div style="padding:24px;min-height:360px;background:#f5f5f5;">
+<div class="wf-card" style="display:block;text-align:center;">
+<div class="wf-card-title">点击 🟠 发布按钮后</div>
+<div class="wf-card-desc">弹出模块选择面板</div>
+</div>
+</div>
+<div class="wf-modal-overlay">
+<div class="wf-modal">
+<div class="wf-modal-title">选择发布类型</div>
+<div class="wf-modal-option">💼 校招内推</div>
+<div class="wf-modal-option">🏠 租房找房</div>
+<div class="wf-modal-option">🔄 二手交易</div>
+<div class="wf-modal-option">🎯 生活信息</div>
+<div class="wf-modal-option" style="border:none;color:#888;text-align:center;padding-top:16px;">取消</div>
+</div>
+</div>
+</div>
+</div>
+<div class="screen-card" id="s-profile">
+<div class="header-bar">个人主页</div>
+<div class="screen-label">Screen 6 · 个人主页</div>
+<div class="wf-bar">
+<div style="width:40px;"></div>
+<div class="wf-bar-title">我的</div>
+<div style="font-size:13px;color:#888;">⚙️</div>
+</div>
+<div class="wf-profile-header">
+<div class="wf-avatar-lg"></div>
+<div class="wf-profile-name">张三</div>
+<span class="wf-author-badge" style="margin-top:4px;">✓ 已认证</span>
+<div class="wf-profile-school">浙江大学 · 计算机学院</div>
+<div class="wf-stats">
+<div class="wf-stat"><div class="wf-stat-num">12</div><div class="wf-stat-label">我的发布</div></div>
+<div class="wf-stat"><div class="wf-stat-num">5</div><div class="wf-stat-label">收藏</div></div>
+</div>
+</div>
+<div class="wf-tabs">
+<div class="wf-tab active">我的发布</div>
+<div class="wf-tab">收藏</div>
+</div>
+<div class="wf-feed" style="padding:0;">
+<div class="wf-list-item"><div class="wf-list-title"><span class="wf-card-tag secondhand" style="vertical-align:middle;">二手</span> 数据结构教材</div><div class="wf-list-time">2天前 · 已发布</div></div>
+<div class="wf-list-item"><div class="wf-list-title"><span class="wf-card-tag career" style="vertical-align:middle;">校招</span> 字节跳动后端内推</div><div class="wf-list-time">5天前 · 已发布</div></div>
+<div class="wf-list-item"><div class="wf-list-title"><span class="wf-card-tag life" style="vertical-align:middle;">美食</span> 食堂三楼重庆小面</div><div class="wf-list-time">1周前 · 已发布</div></div>
+</div>
+</div>
+<script>
+document.querySelectorAll('.screen-nav a').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.screen-nav a').forEach(function(n) { n.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+window.addEventListener('scroll', function() {
+  var cards = document.querySelectorAll('.screen-card');
+  var navLinks = document.querySelectorAll('.screen-nav a');
+  var scrollPos = window.scrollY + 120;
+  cards.forEach(function(card, i) {
+    if (scrollPos >= card.offsetTop && scrollPos < card.offsetTop + card.offsetHeight) {
+      navLinks.forEach(function(n) { n.classList.remove('active'); });
+      if (navLinks[i]) navLinks[i].classList.add('active');
+    }
+  });
+});
+</script>
+
+</body></html>

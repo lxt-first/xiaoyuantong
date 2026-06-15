@@ -5,10 +5,23 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm run dev -w packages/server",
     "dev:client": "npm run dev -w packages/client",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "npm run build -w packages/server && npm run build -w packages/client",
+    "test": "npm run test -w packages/server",
+    "typecheck": "npm run typecheck -w packages/server && npm run typecheck -w packages/client",
     "db:migrate": "npm run db:migrate -w packages/server",
-    "db:studio": "npm run db:studio -w packages/server"
+    "db:studio": "npm run db:studio -w packages/server",
+    "db:generate": "npm run db:generate -w packages/server"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/supertest": "^7.2.0",
+    "concurrently": "^9.2.1",
+    "jsdom": "^29.1.1",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.8"
   }
 }

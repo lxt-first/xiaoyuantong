@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校园通 · 高保真交互原型</title>
+<style>
+:root{--primary:#2563EB;--primary-light:#DBEAFE;--success:#16A34A;--success-light:#DCFCE7;--danger:#DC2626;--danger-light:#FEE2E2;--warning:#F59E0B;--warning-light:#FEF3C7;--bg-page:#F3F4F6;--bg-surface:#FFFFFF;--text-primary:#111827;--text-secondary:#6B7280;--text-tertiary:#9CA3AF;--border:#E5E7EB;--shadow-card:0 1px 3px rgba(0,0,0,.08);--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-full:999px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter","Noto Sans SC",-apple-system,sans-serif;background:#E8E8E8;color:var(--text-primary)}
+.phone-frame{max-width:800px;min-height:600px;background:var(--bg-surface);margin:24px auto;border-radius:10px;overflow:hidden;position:relative;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.status-bar{height:36px;background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:11px;font-weight:600;flex-shrink:0}
+.screen{display:none;flex-direction:column;height:100%;overflow:hidden}
+.screen.active{display:flex}
+@keyframes slideIn{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+.scroll-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.nav-bar{height:48px;background:var(--bg-surface);display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.nav-back{font-size:14px;color:var(--primary);cursor:pointer;min-width:48px;user-select:none}.nav-back:active{opacity:.7}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.nav-action{font-size:14px;color:var(--primary);cursor:pointer;min-width:48px;text-align:right;font-weight:600;user-select:none}
+.nav-action.disabled{color:var(--text-tertiary);cursor:default}.nav-action.red{color:var(--danger)}
+.nav-more{font-size:22px;color:var(--text-secondary);cursor:pointer;min-width:44px;text-align:right;line-height:1;user-select:none}
+.home-header{background:var(--bg-surface);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.home-title{font-size:20px;font-weight:700;display:flex;align-items:center;gap:6px}
+.home-school{font-size:12px;color:var(--text-secondary);cursor:pointer;user-select:none}.home-school:active{opacity:.7}
+.bottom-nav{height:64px;background:var(--bg-surface);border-top:1px solid var(--border);display:flex;align-items:stretch;flex-shrink:0}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--text-tertiary);font-size:10px;transition:color .15s;user-select:none}
+.nav-item.active{color:var(--primary)}.nav-item svg{width:22px;height:22px}
+.nav-item.plus-btn .plus-circle{width:44px;height:44px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-20px;box-shadow:0 2px 8px rgba(37,99,235,.35)}
+.nav-item.plus-btn .plus-circle svg{color:#fff;width:24px;height:24px}
+.module-tabs{display:flex;background:var(--bg-surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.module-tabs::-webkit-scrollbar{display:none}
+.module-tab{padding:10px 16px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;transition:all .15s;user-select:none}
+.module-tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.sub-tabs{display:flex;background:var(--bg-surface);flex-shrink:0}
+.sub-tab{flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;transition:all .15s;user-select:none}
+.sub-tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+
+.quick-post{display:flex;align-items:center;padding:10px 16px;background:var(--bg-surface);border-bottom:1px solid var(--border);gap:10px;flex-shrink:0}
+.qp-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#DBEAFE,#93C5FD);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--primary)}
+.qp-input{flex:1;height:34px;background:#F3F4F6;border-radius:var(--radius-full);padding:0 14px;font-size:13px;color:var(--text-tertiary);display:flex;align-items:center;cursor:pointer;user-select:none}.qp-input:active{background:#E5E7EB}
+.feed{padding:12px}
+.feed-card{background:var(--bg-surface);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;border:1px solid var(--border);box-shadow:var(--shadow-card);display:flex;gap:12px;cursor:pointer;transition:transform .1s;user-select:none}
+.feed-card:active{transform:scale(.985)}.feed-card-body{flex:1;min-width:0}
+.feed-card-thumb{width:72px;height:72px;border-radius:var(--radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
+.feed-card-thumb.career{background:linear-gradient(135deg,#DBEAFE,#BFDBFE)}.feed-card-thumb.rental{background:linear-gradient(135deg,#DCFCE7,#BBF7D0)}
+.feed-card-thumb.secondhand{background:linear-gradient(135deg,#FEE2E2,#FECACA)}.feed-card-thumb.life{background:linear-gradient(135deg,#FEF3C7,#FDE68A)}
+.mod-tag{display:inline-block;padding:2px 8px;border-radius:var(--radius-full);font-size:10px;font-weight:600;line-height:20px;margin-bottom:6px}
+.mod-tag.career{background:var(--primary-light);color:var(--primary)}.mod-tag.rental{background:var(--success-light);color:var(--success)}
+.mod-tag.secondhand{background:var(--danger-light);color:var(--danger)}.mod-tag.life{background:var(--warning-light);color:#D97706}
+.card-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.card-desc{font-size:12px;color:var(--text-secondary);line-height:1.4;margin-bottom:4px}
+.card-time{font-size:11px;color:var(--text-tertiary)}.card-price{font-size:14px;font-weight:700;color:var(--danger)}
+.search-bar{margin:12px 16px;background:#F0F0F0;border-radius:var(--radius-md);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.search-bar input{flex:1;border:none;background:none;font-size:13px;color:var(--text-primary);outline:none;font-family:inherit}.search-bar input::placeholder{color:var(--text-tertiary)}
+.list-item{background:var(--bg-surface);padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;user-select:none}
+.list-item:active{background:#F9FAFB}.list-item-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.list-item-meta{font-size:12px;color:var(--text-secondary)}.list-item-time{font-size:11px;color:var(--text-tertiary);margin-top:2px}
+.list-item-row{display:flex;align-items:center;gap:12px}.list-item-thumb{width:56px;height:56px;border-radius:var(--radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.rental-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.rental-card{background:var(--bg-surface);border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:transform .1s;user-select:none}
+.rental-card:active{transform:scale(.985)}.rental-card-img{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:32px}
+.rental-card-body{padding:10px 12px}.rental-card-title{font-size:13px;font-weight:600;margin-bottom:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.rental-card-price{font-size:16px;font-weight:700;color:var(--danger)}.rental-card-price span{font-size:11px;font-weight:400;color:var(--text-secondary)}
+.rental-card-meta{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.rental-card-area{display:inline-block;padding:2px 6px;border-radius:var(--radius-sm);background:#F3F4F6;font-size:10px;color:var(--text-secondary);margin-top:4px}
+
+.detail-carousel{height:260px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.carousel-dots{position:absolute;bottom:12px;display:flex;gap:6px;justify-content:center;width:100%;z-index:2}
+.carousel-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);transition:all .2s;cursor:pointer}
+.carousel-dot.active{background:#fff;width:18px;border-radius:3px}
+.detail-body{padding:16px;background:var(--bg-surface)}.detail-tags{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.detail-title{font-size:20px;font-weight:600;line-height:28px;margin-bottom:6px}
+.detail-price{font-size:24px;font-weight:700;color:var(--danger);margin-bottom:8px}
+.detail-desc{font-size:14px;color:var(--text-secondary);line-height:1.6;margin-top:12px}
+.detail-meta{font-size:13px;color:var(--text-secondary);margin-top:12px;line-height:1.6}
+.detail-ref-code{display:inline-flex;align-items:center;gap:8px;background:var(--primary-light);border-radius:var(--radius-md);padding:10px 16px;font-size:14px;font-weight:600;color:var(--primary);margin-top:10px;cursor:pointer;user-select:none}
+.detail-ref-code:active{background:#BFDBFE}
+.author-card{display:flex;align-items:center;gap:12px;padding:14px;background:#F9FAFB;border-radius:var(--radius-lg);margin:16px;cursor:pointer;user-select:none}
+.author-card:active{background:#F3F4F6}.author-avatar{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--primary)}
+.author-avatar.career{background:linear-gradient(135deg,#DBEAFE,#93C5FD)}.author-avatar.rental{background:linear-gradient(135deg,#DCFCE7,#86EFAC)}
+.author-avatar.secondhand{background:linear-gradient(135deg,#FEE2E2,#FCA5A5)}.author-avatar.life{background:linear-gradient(135deg,#FEF3C7,#FCD34D)}
+.author-info{flex:1;min-width:0}.author-name{font-size:14px;font-weight:600}.author-school{font-size:12px;color:var(--text-secondary)}
+.author-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;background:var(--success-light);color:var(--success);margin-top:2px}
+.bottom-action{display:flex;gap:12px;padding:12px 16px;background:var(--bg-surface);border-top:1px solid var(--border);flex-shrink:0}
+.btn{height:44px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;font-family:inherit;user-select:none}
+.btn:active{transform:scale(.97)}.btn-outline{flex:1;background:var(--bg-surface);border:1.5px solid var(--border);color:var(--text-primary)}
+.btn-outline.favorited{border-color:var(--warning);color:var(--warning);background:var(--warning-light)}
+.btn-primary{flex:1;background:var(--primary);color:#fff}.btn-primary:active{background:#1D4ED8}.btn-block{width:100%;margin-top:20px}
+.form-section{padding:16px}.form-group{margin-bottom:20px}.form-label{font-size:14px;font-weight:600;margin-bottom:8px;display:block}.form-required{color:var(--danger)}
+.form-input{width:100%;height:44px;border:1px solid var(--border);border-radius:var(--radius-md);padding:0 12px;font-size:14px;color:var(--text-primary);background:var(--bg-surface);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1)}.form-input.error{border-color:var(--danger)}.form-input.with-prefix{padding-left:28px}
+.form-textarea{width:100%;min-height:100px;border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;font-size:14px;color:var(--text-primary);background:var(--bg-surface);outline:none;resize:vertical;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+.form-textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1)}.form-hint{font-size:12px;color:var(--text-tertiary);margin-top:4px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.input-prefix{position:relative}
+.input-prefix-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-secondary);z-index:1}
+.star-rating{display:flex;gap:4px}.star-btn{width:36px;height:36px;border:none;background:none;cursor:pointer;font-size:28px;color:var(--text-tertiary);transition:color .1s,transform .1s;padding:0;line-height:1;font-family:inherit}
+.star-btn.active{color:var(--warning)}.star-btn:active{transform:scale(1.2)}.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.photo-cell{aspect-ratio:1;border-radius:var(--radius-md);background:#F9FAFB;border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s;font-size:12px;color:var(--text-tertiary);user-select:none}
+.photo-cell:hover{border-color:var(--primary)}
+
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:flex-end;z-index:100;pointer-events:none;transition:background .25s}
+.overlay.show{background:rgba(0,0,0,.4);pointer-events:auto}
+.bottom-sheet{background:var(--bg-surface);border-radius:var(--radius-lg) var(--radius-lg) 0 0;width:100%;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.overlay.show .bottom-sheet{transform:translateY(0)}.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto}
+.sheet-title{font-size:16px;font-weight:600;text-align:center;margin-bottom:8px}
+.sheet-option{padding:14px 20px;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .1s;user-select:none}
+.sheet-option:active{background:#F9FAFB}.sheet-option-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sheet-option-text{flex:1}.sheet-option-arrow{color:var(--text-tertiary)}
+.sheet-cancel{padding:14px;text-align:center;font-size:14px;color:var(--text-secondary);cursor:pointer;border-top:1px solid var(--border);margin-top:4px;user-select:none}.sheet-cancel:active{background:#F9FAFB}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);background:rgba(17,24,39,.88);color:#fff;padding:10px 20px;border-radius:var(--radius-md);font-size:13px;z-index:200;pointer-events:none;opacity:0;transition:all .25s;white-space:nowrap;font-family:inherit}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.more-menu{position:absolute;top:48px;right:8px;background:var(--bg-surface);border-radius:var(--radius-md);box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:60;min-width:130px;display:none;overflow:hidden}
+.more-menu.show{display:block;animation:fadeIn .15s ease-out}@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.more-menu-item{padding:12px 16px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;transition:background .1s}
+.more-menu-item:active{background:#F9FAFB}.more-menu-item.danger{color:var(--danger)}.more-menu-divider{height:1px;background:var(--border)}
+.login-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:60px 32px 32px;background:var(--bg-surface);overflow-y:auto}
+.login-logo{font-size:56px;margin-bottom:16px}.login-title{font-size:22px;font-weight:700;margin-bottom:4px}
+.login-subtitle{font-size:13px;color:var(--text-secondary);margin-bottom:36px;text-align:center}.login-form{width:100%}
+.login-input{width:100%;height:48px;border:1px solid var(--border);border-radius:var(--radius-md);padding:0 14px;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;background:var(--bg-surface)}
+.login-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1)}.login-code-row{display:flex;gap:10px;margin-top:16px}.login-code-row .login-input{flex:1}
+.btn-code{height:48px;padding:0 16px;border-radius:var(--radius-md);background:var(--bg-surface);border:1px solid var(--primary);color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:inherit;user-select:none}
+.btn-code:active{background:var(--primary-light)}.btn-code.counting{color:var(--text-tertiary);border-color:var(--border);cursor:default}
+.login-agreement{font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:20px;line-height:1.5}.login-agreement a{color:var(--primary);text-decoration:none}
+.verify-body{flex:1;padding:36px 32px;background:var(--bg-surface);overflow-y:auto}.verify-icon{font-size:56px;text-align:center;margin-bottom:16px}
+.verify-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:8px}
+.verify-desc{font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:28px;line-height:1.5}
+.verify-steps{margin-bottom:24px}.verify-step{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.verify-step-num{width:22px;height:22px;border-radius:50%;background:var(--primary-light);color:var(--primary);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.verify-step-text{font-size:13px;color:var(--text-secondary);line-height:1.5;padding-top:2px}
+.profile-header{text-align:center;padding:32px 16px 20px;background:var(--bg-surface);flex-shrink:0}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#DBEAFE,#93C5FD);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--primary);font-weight:600}
+.profile-name{font-size:18px;font-weight:600}.profile-school{font-size:13px;color:var(--text-secondary);margin-top:2px}
+.profile-stats{display:flex;margin-top:16px;position:relative}.profile-stat{flex:1;text-align:center;cursor:pointer;user-select:none}
+.profile-stat:active{opacity:.7}.profile-stat-num{font-size:20px;font-weight:700}.profile-stat-label{font-size:11px;color:var(--text-secondary)}
+.profile-stat-divider{position:absolute;left:50%;top:4px;bottom:4px;width:1px;background:var(--border)}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center}
+.empty-icon{font-size:56px;margin-bottom:16px;opacity:.5}.empty-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.empty-desc{font-size:13px;color:var(--text-secondary);margin-bottom:24px;line-height:1.5}
+.empty-btn{padding:10px 24px;border-radius:var(--radius-sm);background:var(--primary);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit}.empty-btn:active{background:#1D4ED8}
+@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:400px 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:4px}
+.sk-card{background:var(--bg-surface);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;border:1px solid var(--border)}.sk-row{display:flex;gap:12px}
+.sk-line{height:12px;border-radius:4px;margin-bottom:8px}.sk-line.w60{width:60%}.sk-line.w80{width:80%}.sk-line.w40{width:40%}.sk-line.w100{width:100%}
+.sk-thumb{width:72px;height:72px;border-radius:var(--radius-sm);flex-shrink:0}.filter-chips{display:flex;gap:8px;padding:12px 16px 0;flex-shrink:0}
+.filter-chip{padding:6px 14px;border-radius:var(--radius-full);font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;white-space:nowrap;user-select:none;transition:all .15s}
+.filter-chip.active{background:var(--primary-light);color:var(--primary);border-color:var(--primary)}
+.mod-tag.selectable{padding:8px 16px;font-size:13px;cursor:pointer}.mod-tag.selected{box-shadow:0 0 0 2px var(--primary)}
+.nav-icon-svg{width:22px;height:22px}
+.screen-nav{position:sticky;top:0;z-index:100;background:#2563EB;display:flex;overflow-x:auto;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.screen-nav a{display:block;padding:12px 20px;color:rgba(255,255,255,.75);text-decoration:none;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;cursor:pointer}
+.screen-nav a:hover,.screen-nav a.active{color:#fff;border-bottom-color:#fff;background:rgba(255,255,255,.1)}
+</style></head><body>
+
+<div class="screen-nav">
+<a href="#" onclick="navigateTo('home');return false" class="active">首页</a>
+<a href="#" onclick="navigateTo('career-list');return false">校招列表</a>
+<a href="#" onclick="navigateTo('rental-list');return false">租房列表</a>
+<a href="#" onclick="navigateTo('secondhand-list');return false">二手列表</a>
+<a href="#" onclick="navigateTo('life-list');return false">生活信息</a>
+<a href="#" onclick="navigateTo('detail-secondhand');return false">详情页</a>
+<a href="#" onclick="navigateTo('login');return false">登录</a>
+<a href="#" onclick="navigateTo('profile');return false">我的</a>
+</div>
+<div class="note-banner" style="background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;text-align:center;padding:10px 24px;font-size:13px;max-width:800px;margin:0 auto;border-radius:0 0 8px 8px">
+🏫 校园通 · 高保真交互原型 — 点击上方标签切换屏幕</div>
+
+<div class="phone-frame" id="app">
+<div class="status-bar"><span style="font-size:14px;font-weight:700">9:41</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:12px">5G</span><span>▮▮▮▮</span></span></div>
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay" onclick="closeSheet()"><div class="bottom-sheet" onclick="event.stopPropagation()"><div class="sheet-handle"></div><div class="sheet-title">选择发布类型</div>
+<div class="sheet-option" onclick="closeSheet();navigateTo('publish-career')"><div class="sheet-option-icon" style="background:#2563EB22;color:#2563EB">💼</div><div class="sheet-option-text">校招内推</div><div class="sheet-option-arrow">›</div></div>
+<div class="sheet-option" onclick="closeSheet();navigateTo('publish-rental')"><div class="sheet-option-icon" style="background:#16A34A22;color:#16A34A">🏠</div><div class="sheet-option-text">出租房源</div><div class="sheet-option-arrow">›</div></div>
+<div class="sheet-option" onclick="closeSheet();navigateTo('publish-secondhand')"><div class="sheet-option-icon" style="background:#DC262622;color:#DC2626">🔄</div><div class="sheet-option-text">二手物品</div><div class="sheet-option-arrow">›</div></div>
+<div class="sheet-option" onclick="closeSheet();navigateTo('publish-life')"><div class="sheet-option-icon" style="background:#D9770622;color:#D97706">🍜</div><div class="sheet-option-text">美食推荐</div><div class="sheet-option-arrow">›</div></div>
+<div class="sheet-cancel" onclick="closeSheet()">取消</div></div></div>
+<div class="more-menu" id="moreMenu" onclick="event.stopPropagation()"><div class="more-menu-item" onclick="showToast('已收藏');closeMoreMenu()">☆ 收藏</div><div class="more-menu-divider"></div><div class="more-menu-item" onclick="showToast('举报已提交');closeMoreMenu()">🚩 举报</div><div class="more-menu-divider"></div><div class="more-menu-item" onclick="showToast('链接已复制');closeMoreMenu()">🔗 分享</div></div>
+<div class="screen active" id="screen-home">
+<div class="home-header"><div class="home-title">🏫 校园通</div><div class="home-school" onclick="showToast('学校选择功能开发中')">华北理工大学 ▾</div></div>
+<div class="module-tabs" id="home-tabs">
+<div class="module-tab active" onclick="switchHomeTab(this)">全部</div>
+<div class="module-tab" onclick="switchHomeTab(this)">校招</div>
+<div class="module-tab" onclick="switchHomeTab(this)">租房</div>
+<div class="module-tab" onclick="switchHomeTab(this)">二手</div>
+<div class="module-tab" onclick="switchHomeTab(this)">生活</div>
+</div>
+<div class="quick-post"><div class="qp-avatar">张</div><div class="qp-input" onclick="navigateTo('login')">分享校园新鲜事...</div></div>
+<div class="scroll-content"><div class="feed">
+<div class="feed-card" onclick="navigateTo('detail-secondhand')"><div class="feed-card-body"><span class="mod-tag secondhand">二手</span><div class="card-title">几乎全新的数据结构教材</div><div class="card-desc">紫金港校区 · 计算机专业适用</div><div class="card-price">¥15</div><div class="card-time">2小时前</div></div><div class="feed-card-thumb secondhand">🔄</div></div>
+<div class="feed-card" onclick="navigateTo('detail-life')"><div class="feed-card-body"><span class="mod-tag life">美食</span><div class="card-title">紫金港食堂三楼麻辣烫</div><div class="card-desc">汤底浓郁，食材新鲜，性价比超高</div><div class="card-time">3小时前</div></div><div class="feed-card-thumb life">🍜</div></div>
+<div class="feed-card" onclick="navigateTo('detail-career')"><div class="feed-card-body"><span class="mod-tag career">校招</span><div class="card-title">字节跳动 后端开发实习生内推</div><div class="card-desc">张三 · 计算机学院 · 有效期至6/30</div><div class="card-time">5小时前</div></div></div>
+<div class="feed-card" onclick="navigateTo('detail-rental')"><div class="feed-card-body"><span class="mod-tag rental">租房</span><div class="card-title">紫金港周边单间转租 步行10分钟</div><div class="card-desc">1室0厅 · 独立卫浴 · 月付</div><div class="card-price">¥1200/月</div><div class="card-time">6小时前</div></div><div class="feed-card-thumb rental">🏠</div></div>
+<div class="feed-card" onclick="navigateTo('detail-secondhand')"><div class="feed-card-body"><span class="mod-tag secondhand">二手</span><div class="card-title">Cherry MX 青轴机械键盘</div><div class="card-desc">9成新 · 使用半年 · 配件齐全</div><div class="card-price">¥120</div><div class="card-time">昨天</div></div><div class="feed-card-thumb secondhand">🔄</div></div>
+<div class="feed-card" onclick="navigateTo('detail-life')"><div class="feed-card-body"><span class="mod-tag life">美食</span><div class="card-title">小西门外阿姨炒粉干</div><div class="card-desc">量大实惠，加蛋加火腿才10块</div><div class="card-time">昨天</div></div><div class="feed-card-thumb life">🍜</div></div>
+</div></div>
+<div class="bottom-nav"><div class="nav-item active" onclick="navigateTo('home')"><span style="font-size:18px">🏠</span><span>首页</span></div><div class="nav-item" onclick="navigateTo('career-list')"><span style="font-size:18px">💼</span><span>求职</span></div><div class="nav-item plus-btn" onclick="openSheet()"><div class="plus-circle"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div><div class="nav-item" onclick="navigateTo('')"><span style="font-size:18px">🔔</span><span>消息</span></div><div class="nav-item" onclick="navigateTo('profile')"><span style="font-size:18px">👤</span><span>我的</span></div></div>
+</div>
+<div class="screen" id="screen-career-list">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title">校招内推</div><div class="nav-action" onclick="showToast('发布功能即将上线')">发布</div></div>
+<div class="sub-tabs"><div class="sub-tab active" onclick="switchSubTab(this)">内推信息</div><div class="sub-tab" onclick="switchSubTab(this)">面经/笔试</div></div>
+<div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="搜索公司/岗位..." oninput="filterCareer(this.value)"></div>
+<div class="scroll-content" id="career-list">
+<div class="list-item" onclick="navigateTo('detail-career')"><div class="list-item-title">字节跳动 后端开发实习生</div><div class="list-item-meta">张三 · 计算机学院 · 内推码 BT2026XYZ</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--danger)">有效期至 2026/06/30</span><span class="list-item-time">2小时前</span></div></div>
+<div class="list-item" onclick="navigateTo('detail-career')"><div class="list-item-title">阿里巴巴 前端工程师校招</div><div class="list-item-meta">李四 · 软件学院 · 直推淘宝技术部</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--danger)">有效期至 2026/07/15</span><span class="list-item-time">2小时前</span></div></div>
+<div class="list-item" onclick="navigateTo('detail-career')"><div class="list-item-title">腾讯 产品经理实习生</div><div class="list-item-meta">王五 · 经管学院</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--danger)">有效期至 2026/06/25</span><span class="list-item-time">2小时前</span></div></div>
+<div class="list-item" onclick="navigateTo('detail-career')"><div class="list-item-title">美团 数据开发工程师</div><div class="list-item-meta">赵六 · 计算机学院 · 内推码 MT2026DEV</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--danger)">有效期至 2026/07/01</span><span class="list-item-time">2小时前</span></div></div>
+<div class="list-item" onclick="navigateTo('detail-career')"><div class="list-item-title">华为 算法工程师实习生</div><div class="list-item-meta">孙七 · 电子信息学院</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--danger)">有效期至 2026/06/20</span><span class="list-item-time">2小时前</span></div></div>
+</div></div>
+<div class="screen" id="screen-rental-list">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title">租房找房</div><div class="nav-action" onclick="showToast('发布功能即将上线')">发布</div></div>
+<div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="搜索区域/小区..."></div>
+<div class="scroll-content"><div class="rental-grid">
+<div class="rental-card" onclick="navigateTo('detail-rental')"><div class="rental-card-img" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0)">🏠</div><div class="rental-card-body"><div class="rental-card-title">紫金港周边单间</div><div class="rental-card-price">1200<span>/月</span></div><div class="rental-card-meta">1室0厅 · 独立卫浴</div><div class="rental-card-area">曹妃甸</div></div></div>
+<div class="rental-card" onclick="navigateTo('detail-rental')"><div class="rental-card-img" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0)">🏠</div><div class="rental-card-body"><div class="rental-card-title">玉兰苑两室整租</div><div class="rental-card-price">2200<span>/月</span></div><div class="rental-card-meta">2室1厅 · 精装修</div><div class="rental-card-area">步行5分钟</div></div></div>
+<div class="rental-card" onclick="navigateTo('detail-rental')"><div class="rental-card-img" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0)">🏠</div><div class="rental-card-body"><div class="rental-card-title">翰林苑主卧独卫</div><div class="rental-card-price">1500<span>/月</span></div><div class="rental-card-meta">3室2厅 · 朝南主卧</div><div class="rental-card-area">翰林苑</div></div></div>
+<div class="rental-card" onclick="navigateTo('detail-rental')"><div class="rental-card-img" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0)">🏠</div><div class="rental-card-body"><div class="rental-card-title">校内家属楼次卧</div><div class="rental-card-price">900<span>/月</span></div><div class="rental-card-meta">2室1厅 · 校内安全</div><div class="rental-card-area">校内</div></div></div>
+<div class="rental-card" onclick="navigateTo('detail-rental')"><div class="rental-card-img" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0)">🏠</div><div class="rental-card-body"><div class="rental-card-title">青年公寓loft</div><div class="rental-card-price">1800<span>/月</span></div><div class="rental-card-meta">1室1厅 · 上下两层</div><div class="rental-card-area">近校门</div></div></div>
+<div class="rental-card" onclick="navigateTo('detail-rental')"><div class="rental-card-img" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0)">🏠</div><div class="rental-card-body"><div class="rental-card-title">紫金港新村单间</div><div class="rental-card-price">1000<span>/月</span></div><div class="rental-card-meta">1室0厅 · 简单装修</div><div class="rental-card-area">紫金港</div></div></div>
+</div></div></div>
+<div class="screen" id="screen-secondhand-list">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title">二手交易</div><div class="nav-action" onclick="showToast('发布功能即将上线')">发布</div></div>
+<div class="filter-chips"><div class="filter-chip active" onclick="switchFilter(this)">全部</div><div class="filter-chip" onclick="switchFilter(this)">书本</div><div class="filter-chip" onclick="switchFilter(this)">生活用品</div><div class="filter-chip" onclick="switchFilter(this)">非实体</div></div>
+<div class="scroll-content">
+<div class="list-item" onclick="navigateTo('detail-secondhand')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#FEE2E2,#FECACA)">🔄</div><div style="flex:1;min-width:0"><div class="list-item-title">几乎全新的数据结构教材</div><div class="list-item-meta">计算机专业适用，只有几页笔记</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span class="card-price">¥15</span><span class="list-item-time">2小时前</span></div></div></div></div>
+<div class="list-item" onclick="navigateTo('detail-secondhand')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE)">🔄</div><div style="flex:1;min-width:0"><div class="list-item-title">Cherry MX 青轴机械键盘</div><div class="list-item-meta">9成新 · 使用半年 · 配件齐全</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span class="card-price">¥120</span><span class="list-item-time">2小时前</span></div></div></div></div>
+<div class="list-item" onclick="navigateTo('detail-secondhand')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">🔄</div><div style="flex:1;min-width:0"><div class="list-item-title">网飞会员账号共享(半年)</div><div class="list-item-meta">UHD套餐，4人车缺1人</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span class="card-price">¥45</span><span class="list-item-time">2小时前</span></div></div></div></div>
+<div class="list-item" onclick="navigateTo('detail-secondhand')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE)">🔄</div><div style="flex:1;min-width:0"><div class="list-item-title">罗技G502游戏鼠标</div><div class="list-item-meta">用了三个月，换新出旧</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span class="card-price">¥80</span><span class="list-item-time">2小时前</span></div></div></div></div>
+<div class="list-item" onclick="navigateTo('detail-secondhand')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#FEE2E2,#FECACA)">🔄</div><div style="flex:1;min-width:0"><div class="list-item-title">全新考研政治全套</div><div class="list-item-meta">肖秀荣2026版，全新未拆</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span class="card-price">¥50</span><span class="list-item-time">2小时前</span></div></div></div></div>
+</div></div>
+<div class="screen" id="screen-life-list">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title">美食推荐</div><div class="nav-action" onclick="showToast('发布功能即将上线')">发布</div></div>
+<div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="搜索美食/餐厅..."></div>
+<div class="scroll-content">
+<div class="list-item" onclick="navigateTo('detail-food')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">🍜</div><div style="flex:1;min-width:0"><div class="list-item-title">紫金港食堂三楼 重庆小面</div><div class="list-item-meta">麻辣鲜香，面条劲道</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="display:inline-flex;align-items:center;gap:2px"><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--text-tertiary)">★</span><span style="font-size:12px;font-weight:600;color:var(--warning);margin-left:4px">4.0</span></span><span class="list-item-time">2小时前</span></div></div></div></div>
+<div class="list-item" onclick="navigateTo('detail-food')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">🍜</div><div style="flex:1;min-width:0"><div class="list-item-title">小西门外 阿姨炒粉干</div><div class="list-item-meta">量大实惠，深夜食堂首选</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="display:inline-flex;align-items:center;gap:2px"><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--text-tertiary)">★</span><span style="font-size:12px;font-weight:600;color:var(--warning);margin-left:4px">4.5</span></span><span class="list-item-time">2小时前</span></div></div></div></div>
+<div class="list-item" onclick="navigateTo('detail-food')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">🍜</div><div style="flex:1;min-width:0"><div class="list-item-title">校内全家 芝士热狗棒</div><div class="list-item-meta">微波炉一叮就能吃，赶早课神器</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="display:inline-flex;align-items:center;gap:2px"><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--text-tertiary)">★</span><span style="font-size:16px;color:var(--text-tertiary)">★</span><span style="font-size:12px;font-weight:600;color:var(--warning);margin-left:4px">3.5</span></span><span class="list-item-time">2小时前</span></div></div></div></div>
+<div class="list-item" onclick="navigateTo('detail-food')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">🍜</div><div style="flex:1;min-width:0"><div class="list-item-title">玉兰苑二楼 兰州拉面</div><div class="list-item-meta">手工现拉，汤清面筋道</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="display:inline-flex;align-items:center;gap:2px"><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--text-tertiary)">★</span><span style="font-size:12px;font-weight:600;color:var(--warning);margin-left:4px">4.0</span></span><span class="list-item-time">2小时前</span></div></div></div></div>
+<div class="list-item" onclick="navigateTo('detail-food')"><div class="list-item-row"><div class="list-item-thumb" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">🍜</div><div style="flex:1;min-width:0"><div class="list-item-title">西门烧烤 羊肉串</div><div class="list-item-meta">现切现烤，孜然味足</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="display:inline-flex;align-items:center;gap:2px"><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--warning)">★</span><span style="font-size:16px;color:var(--text-tertiary)">★</span><span style="font-size:12px;font-weight:600;color:var(--warning);margin-left:4px">4.5</span></span><span class="list-item-time">2小时前</span></div></div></div></div>
+</div></div>
+<div class="screen" id="screen-detail-secondhand">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title"></div></div>
+<div class="nav-more" style="position:relative" onclick="toggleMoreMenu(event,this)">⋯</div></div>
+<div style="position:relative;height:260px;flex-shrink:0"><div class="detail-carousel" style="background:linear-gradient(135deg,#FEE2E2,#FECACA)"><div style="text-align:center"><div style="font-size:64px;margin-bottom:8px">📖</div><div style="font-size:15px;font-weight:600;color:rgba(0,0,0,0.4)">数据结构教材</div></div></div><div class="carousel-dots"><div class="carousel-dot active"></div><div class="carousel-dot"></div><div class="carousel-dot"></div></div></div>
+<div class="detail-body"><div class="detail-tags"><span class="mod-tag secondhand">二手</span><span style="font-size:12px;color:var(--text-secondary);padding:4px 10px;background:#F3F4F6;border-radius:var(--radius-full)">书本</span></div><div class="detail-title">几乎全新的数据结构教材</div><div class="detail-price">¥15</div><div class="detail-desc">大三时候买的，基本没怎么翻过。适合计算机专业同学参考使用，重点章节有荧光笔标注，但不影响阅读。</div><div class="detail-meta">📍 交易地点：紫金港校区</div></div>
+<div class="author-card" onclick="showToast('个人主页功能开发中')"><div class="author-avatar secondhand">王</div><div class="author-info"><div class="author-name">王五</div><div class="author-school">华北理工大学 · 计算机学院</div><span class="author-badge">✓ 已认证学生</span></div></div>
+<div class="bottom-action"><button class="btn btn-outline" id="fav-secondhand" onclick="toggleFav(this)">☆ 收藏</button><button class="btn btn-primary" onclick="showToast('请先完成校园认证后查看联系方式')">📋 联系卖家</button></div></div>
+<div class="screen" id="screen-detail-food">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title"></div></div>
+<div class="nav-more" style="position:relative" onclick="toggleMoreMenu(event,this)">⋯</div></div>
+<div style="position:relative;height:260px;flex-shrink:0"><div class="detail-carousel" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)"><div style="text-align:center"><div style="font-size:64px;margin-bottom:8px">🍜</div><div style="font-size:15px;font-weight:600;color:rgba(0,0,0,0.4)">重庆小面</div></div></div><div class="carousel-dots"><div class="carousel-dot active"></div><div class="carousel-dot"></div></div></div>
+<div class="detail-body"><div class="detail-tags"><span class="mod-tag life">美食</span></div><div class="detail-title">紫金港食堂三楼 重庆小面</div><div style="margin:8px 0"><span style="display:inline-flex;align-items:center;gap:2px"><span style="font-size:22px;color:var(--warning)">★</span><span style="font-size:22px;color:var(--warning)">★</span><span style="font-size:22px;color:var(--warning)">★</span><span style="font-size:22px;color:var(--warning)">★</span><span style="font-size:22px;color:var(--text-tertiary)">★</span><span style="font-size:18px;font-weight:600;color:var(--warning);margin-left:4px">4.0</span></span></div><div class="detail-desc">麻辣鲜香，面条劲道！12元一碗的价格在食堂里算贵的，但分量足、味道好，绝对值回票价。推荐加个煎蛋，2块钱，香得很。</div><div class="detail-meta">📍 紫金港食堂三楼 · 11号档口<br>🕐 营业时间：11:00-13:30, 17:00-19:30</div></div>
+<div class="author-card" onclick="showToast('个人主页功能开发中')"><div class="author-avatar life">李</div><div class="author-info"><div class="author-name">李思</div><div class="author-school">华北理工大学 · 食品学院</div><span class="author-badge">✓ 已认证学生</span></div></div>
+<div class="bottom-action"><button class="btn btn-outline" id="fav-food" onclick="toggleFav(this)">☆ 收藏</button><button class="btn btn-primary" onclick="showToast('感谢你的认可!')">👍 有用</button></div></div>
+<div class="screen" id="screen-detail-career">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title"></div></div>
+<div class="nav-more" style="position:relative" onclick="toggleMoreMenu(event,this)">⋯</div></div>
+<div style="position:relative;height:260px;flex-shrink:0"><div class="detail-carousel" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE)"><div style="text-align:center"><div style="font-size:64px;margin-bottom:8px">💼</div><div style="font-size:15px;font-weight:600;color:rgba(0,0,0,0.4)">字节跳动</div></div></div></div>
+<div class="detail-body"><div class="detail-tags"><span class="mod-tag career">校招</span></div><div class="detail-title">字节跳动 后端开发实习生</div><div class="detail-desc">飞书团队招聘后端实习生，主要用Go和Python。要求熟悉至少一门后端语言，了解基本的网络协议和数据库原理。有开源项目经验者优先。</div><div class="detail-meta">🏢 公司：字节跳动<br>📍 地点：北京/上海/杭州<br>📅 有效期至：2026年6月30日</div><div class="detail-ref-code" onclick="copyReferral()">📋 复制内推码 <b>BT2026XYZ</b></div></div>
+<div class="author-card" onclick="showToast('个人主页功能开发中')"><div class="author-avatar career">张</div><div class="author-info"><div class="author-name">张三</div><div class="author-school">华北理工大学 · 计算机学院</div><span class="author-badge">✓ 已认证学生</span></div></div>
+<div class="bottom-action"><button class="btn btn-outline" id="fav-career" onclick="toggleFav(this)">☆ 收藏</button><button class="btn btn-primary" onclick="copyReferral()">📋 复制内推码</button></div></div>
+<div class="screen" id="screen-detail-rental">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title"></div></div>
+<div class="nav-more" style="position:relative" onclick="toggleMoreMenu(event,this)">⋯</div></div>
+<div style="position:relative;height:260px;flex-shrink:0"><div class="detail-carousel" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0)"><div style="text-align:center"><div style="font-size:64px;margin-bottom:8px">🏠</div><div style="font-size:15px;font-weight:600;color:rgba(0,0,0,0.4)">紫金港周边单间</div></div></div><div class="carousel-dots"><div class="carousel-dot active"></div><div class="carousel-dot"></div><div class="carousel-dot"></div></div></div>
+<div class="detail-body"><div class="detail-tags"><span class="mod-tag rental">租房</span></div><div class="detail-title">紫金港周边单间转租 步行10分钟到校</div><div class="detail-price">¥1,200<span style="font-size:14px;color:var(--text-secondary);font-weight:400"> /月</span></div><div class="detail-desc">因工作调动转租，房间朝南光线好，独立卫浴。小区安静安全，门口有超市和公交站。水电网费另算，押一付一。</div><div class="detail-meta">📍 曹妃甸 · 紫金港新村<br>🏠 1室0厅1卫 · 25㎡<br>🚇 步行至校门约10分钟</div></div>
+<div class="author-card" onclick="showToast('个人主页功能开发中')"><div class="author-avatar rental">赵</div><div class="author-info"><div class="author-name">赵六</div><div class="author-school">华北理工大学 · 土木学院</div><span class="author-badge">✓ 已认证学生</span></div></div>
+<div class="bottom-action"><button class="btn btn-outline" id="fav-rental" onclick="toggleFav(this)">☆ 收藏</button><button class="btn btn-primary" onclick="showToast('请先完成校园认证后查看联系方式')">📞 联系房东</button></div></div>
+<div class="screen" id="screen-publish-food">
+<div class="nav-bar"><div class="nav-back" style="color:var(--danger)" onclick="navigateTo('')">✕ 取消</div><div class="nav-title">发布美食推荐</div><div class="nav-action" onclick="submitPublish('food')">发布 →</div></div>
+<div class="scroll-content"><div class="form-section">
+<div class="form-group"><label class="form-label">餐厅/档口名 <span class="form-required">*</span></label><input class="form-input" id="food-restaurant" placeholder="例如：紫金港食堂三楼 重庆小面" oninput="checkPublishForm('food')"></div>
+<div class="form-group"><label class="form-label">评分 <span class="form-required">*</span></label><div class="star-rating" id="food-stars">
+<button class="star-btn" onclick="setStars('food',1)">★</button>
+<button class="star-btn" onclick="setStars('food',2)">★</button>
+<button class="star-btn" onclick="setStars('food',3)">★</button>
+<button class="star-btn" onclick="setStars('food',4)">★</button>
+<button class="star-btn" onclick="setStars('food',5)">★</button>
+</div></div>
+<div class="form-group"><label class="form-label">添加照片 <span class="form-hint">(最多9张)</span></label><div class="photo-grid"><div class="photo-cell">📷 拍照</div><div class="photo-cell"></div><div class="photo-cell"></div></div></div>
+<div class="form-group"><label class="form-label">评价 <span class="form-required">*</span></label><textarea class="form-textarea" id="food-review" placeholder="说说这家店怎么样..." oninput="checkPublishForm('food')"></textarea></div>
+</div></div></div>
+<div class="screen" id="screen-publish-career">
+<div class="nav-bar"><div class="nav-back" style="color:var(--danger)" onclick="navigateTo('')">✕ 取消</div><div class="nav-title">发布内推信息</div><div class="nav-action" onclick="submitPublish('career')">发布 →</div></div>
+<div class="scroll-content"><div class="form-section">
+<div class="form-group"><label class="form-label">公司名称 <span class="form-required">*</span></label><input class="form-input" id="career-company" placeholder="例如：字节跳动" oninput="checkPublishForm('career')"></div>
+<div class="form-group"><label class="form-label">岗位名称 <span class="form-required">*</span></label><input class="form-input" id="career-position" placeholder="例如：后端开发实习生" oninput="checkPublishForm('career')"></div>
+<div class="form-group"><label class="form-label">内推码</label><input class="form-input" id="career-code" placeholder="输入内推码"></div>
+<div class="form-group"><label class="form-label">岗位描述</label><textarea class="form-textarea" id="career-desc" placeholder="描述岗位要求和团队情况..."></textarea></div>
+<div class="form-group"><label class="form-label">有效期 <span class="form-required">*</span></label><input class="form-input" id="career-expiry" type="date" oninput="checkPublishForm('career')"></div>
+</div></div></div>
+<div class="screen" id="screen-publish-secondhand">
+<div class="nav-bar"><div class="nav-back" style="color:var(--danger)" onclick="navigateTo('')">✕ 取消</div><div class="nav-title">发布二手</div><div class="nav-action" onclick="submitPublish('secondhand')">发布 →</div></div>
+<div class="scroll-content"><div class="form-section">
+<div class="form-group"><label class="form-label">分类 <span class="form-required">*</span></label><div style="display:flex;gap:8px"><span class="mod-tag secondhand selectable selected" onclick="selectCat(this)">书本</span><span class="mod-tag selectable" style="background:#F3F4F6;color:var(--text-secondary)" onclick="selectCat(this)">生活用品</span><span class="mod-tag selectable" style="background:#F3F4F6;color:var(--text-secondary)" onclick="selectCat(this)">非实体</span></div></div>
+<div class="form-group"><label class="form-label">标题 <span class="form-required">*</span></label><input class="form-input" id="secondhand-title" placeholder="例如：几乎全新数据结构教材" oninput="checkPublishForm('secondhand')"></div>
+<div class="form-group"><label class="form-label">价格 <span class="form-required">*</span></label><div class="input-prefix"><span class="input-prefix-icon">¥</span><input class="form-input with-prefix" id="secondhand-price" type="number" placeholder="15" oninput="checkPublishForm('secondhand')"></div></div>
+<div class="form-group"><label class="form-label">描述</label><textarea class="form-textarea" id="secondhand-desc" placeholder="描述物品成色、使用情况..."></textarea></div>
+</div></div></div>
+<div class="screen" id="screen-publish-rental">
+<div class="nav-bar"><div class="nav-back" style="color:var(--danger)" onclick="navigateTo('')">✕ 取消</div><div class="nav-title">发布房源</div><div class="nav-action" onclick="submitPublish('rental')">发布 →</div></div>
+<div class="scroll-content"><div class="form-section">
+<div class="form-group"><label class="form-label">标题 <span class="form-required">*</span></label><input class="form-input" id="rental-title" placeholder="例如：紫金港周边单间转租" oninput="checkPublishForm('rental')"></div>
+<div class="form-group"><label class="form-label">区域/小区 <span class="form-required">*</span></label><input class="form-input" id="rental-area" placeholder="例如：紫金港新村" oninput="checkPublishForm('rental')"></div>
+<div class="form-row"><div class="form-group"><label class="form-label">月租金 <span class="form-required">*</span></label><div class="input-prefix"><span class="input-prefix-icon">¥</span><input class="form-input with-prefix" id="rental-price" type="number" placeholder="1200" oninput="checkPublishForm('rental')"></div></div><div class="form-group"><label class="form-label">户型</label><input class="form-input" id="rental-type" placeholder="1室0厅"></div></div>
+<div class="form-group"><label class="form-label">添加照片 <span class="form-hint">(最多9张)</span></label><div class="photo-grid"><div class="photo-cell">📷 拍照</div><div class="photo-cell"></div><div class="photo-cell"></div></div></div>
+<div class="form-group"><label class="form-label">描述</label><textarea class="form-textarea" id="rental-desc" placeholder="描述房屋情况、周边环境..."></textarea></div>
+</div></div></div>
+<div class="screen" id="screen-login">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title">登录</div></div>
+<div class="login-body"><div class="login-logo">🏫</div><div class="login-title">欢迎来到校园通</div><div class="login-subtitle">校园生活，一站聚合</div><div class="login-form">
+<input class="login-input" type="tel" id="phone-input" placeholder="请输入手机号" maxlength="11">
+<div class="login-code-row"><input class="login-input" type="text" id="code-input" placeholder="请输入验证码" maxlength="6"><button class="btn-code" id="code-btn" onclick="sendCode()">获取验证码</button></div>
+<button class="btn btn-primary btn-block" onclick="doLogin()">登录 / 注册</button>
+<div class="login-agreement">登录即表示同意 <a href="#">《用户协议》</a>和<a href="#">《隐私政策》</a></div>
+</div></div></div>
+<div class="screen" id="screen-verify">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title">校园认证</div></div>
+<div class="verify-body"><div class="verify-icon">🎓</div><div class="verify-title">验证你的校园身份</div><div class="verify-desc">认证后即可发布内容，并获得 ✓ 认证标识<br>你的信息仅用于身份验证，不会公开</div><div class="verify-steps">
+<div class="verify-step"><div class="verify-step-num">1</div><div class="verify-step-text">选择你的学校：华北理工大学</div></div>
+<div class="verify-step"><div class="verify-step-num">2</div><div class="verify-step-text">输入你的 edu 邮箱（如 student@ncst.edu.cn）</div></div>
+<div class="verify-step"><div class="verify-step-num">3</div><div class="verify-step-text">点击发送验证邮件，在邮箱中确认即可完成认证</div></div>
+</div><input class="login-input" type="email" id="edu-email" placeholder="请输入 edu 邮箱">
+<button class="btn btn-primary btn-block" onclick="sendVerifyEmail()">发送验证邮件</button></div></div>
+<div class="screen" id="screen-profile">
+<div class="nav-bar"><div class="nav-title">我的</div></div>
+<div style="min-width:48px;text-align:right;font-size:18px;cursor:pointer;padding:0 16px" onclick="showToast('设置功能开发中')">⚙</div></div>
+<div class="profile-header"><div class="profile-avatar">张</div><div class="profile-name">张三</div><span class="author-badge" style="margin-top:4px">✓ 已认证</span><div class="profile-school">华北理工大学 · 计算机学院</div><div class="profile-stats"><div class="profile-stat" onclick="switchProfileTab('posts')"><div class="profile-stat-num">12</div><div class="profile-stat-label">我的发布</div></div><div class="profile-stat-divider"></div><div class="profile-stat" onclick="showToast('收藏功能开发中')"><div class="profile-stat-num">5</div><div class="profile-stat-label">收藏</div></div></div></div>
+<div class="sub-tabs"><div class="sub-tab active" onclick="switchProfileTab('posts')">我的发布</div><div class="sub-tab" onclick="showToast('收藏功能开发中')">收藏</div></div>
+<div class="scroll-content">
+<div class="list-item" onclick="navigateTo('detail-career')"><span class="mod-tag career">校招</span> <span style="font-size:15px;font-weight:600;margin-left:6px">字节跳动后端内推</span><div class="list-item-time">5天前 · 已发布</div></div>
+<div class="list-item" onclick="navigateTo('detail-secondhand')"><span class="mod-tag secondhand">二手</span> <span style="font-size:15px;font-weight:600;margin-left:6px">数据结构教材</span><div class="list-item-time">2天前 · 已发布</div></div>
+<div class="list-item" onclick="navigateTo('detail-life')"><span class="mod-tag life">美食</span> <span style="font-size:15px;font-weight:600;margin-left:6px">食堂三楼重庆小面</span><div class="list-item-time">1周前 · 已发布</div></div>
+<div class="list-item" onclick="navigateTo('detail-rental')"><span class="mod-tag rental">租房</span> <span style="font-size:15px;font-weight:600;margin-left:6px">紫金港周边单间转租</span><div class="list-item-time">2周前 · 已发布</div></div>
+</div><div class="bottom-nav"><div class="nav-item" onclick="navigateTo('home')"><span style="font-size:18px">🏠</span><span>首页</span></div><div class="nav-item" onclick="navigateTo('career-list')"><span style="font-size:18px">💼</span><span>求职</span></div><div class="nav-item plus-btn" onclick="openSheet()"><div class="plus-circle"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div><div class="nav-item" onclick="navigateTo('')"><span style="font-size:18px">🔔</span><span>消息</span></div><div class="nav-item active" onclick="navigateTo('profile')"><span style="font-size:18px">👤</span><span>我的</span></div></div></div>
+<div class="screen" id="screen-loading">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title">加载中</div></div>
+<div class="scroll-content" style="padding:12px">
+<div class="sk-card"><div class="sk-row"><div style="flex:1"><div class="skeleton sk-line w40"></div><div class="skeleton sk-line w80"></div><div class="skeleton sk-line w60"></div><div class="skeleton sk-line w40"></div></div><div class="skeleton sk-thumb"></div></div></div>
+<div class="sk-card"><div class="sk-row"><div style="flex:1"><div class="skeleton sk-line w40"></div><div class="skeleton sk-line w80"></div><div class="skeleton sk-line w60"></div><div class="skeleton sk-line w40"></div></div><div class="skeleton sk-thumb"></div></div></div>
+<div class="sk-card"><div class="sk-row"><div style="flex:1"><div class="skeleton sk-line w40"></div><div class="skeleton sk-line w80"></div><div class="skeleton sk-line w60"></div><div class="skeleton sk-line w40"></div></div><div class="skeleton sk-thumb"></div></div></div>
+<div class="sk-card"><div class="sk-row"><div style="flex:1"><div class="skeleton sk-line w40"></div><div class="skeleton sk-line w80"></div><div class="skeleton sk-line w60"></div><div class="skeleton sk-line w40"></div></div><div class="skeleton sk-thumb"></div></div></div>
+</div></div>
+<div class="screen" id="screen-empty">
+<div class="nav-bar"><div class="nav-back" onclick="navigateTo('')">← 返回</div><div class="nav-title">搜索结果</div></div>
+<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">没有找到相关内容</div><div class="empty-desc">换个关键词试试，或者发布第一条内容</div><button class="empty-btn" onclick="openSheet()">立即发布</button></div></div>
+</div><!-- .phone-frame -->
+
+<script>
+var history = ['screen-home'], currentStars = {}, favState = {};
+
+function navigateTo(id) {
+  var map = {'home':'screen-home','career-list':'screen-career-list','rental-list':'screen-rental-list','secondhand-list':'screen-secondhand-list','life-list':'screen-life-list','detail-secondhand':'screen-detail-secondhand','detail-food':'screen-detail-food','detail-career':'screen-detail-career','detail-rental':'screen-detail-rental','publish-food':'screen-publish-food','publish-career':'screen-publish-career','publish-rental':'screen-publish-rental','publish-secondhand':'screen-publish-secondhand','login':'screen-login','verify':'screen-verify','profile':'screen-profile','loading':'screen-loading','empty':'screen-empty'};
+  var target = document.getElementById(map[id] || id);
+  if (!target) return;
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  target.classList.add('active');
+  var last = history[history.length - 1];
+  if (last !== target.id) history.push(target.id);
+  closeSheet(); closeMoreMenu();
+  var sc = target.querySelector('.scroll-content');
+  if (sc) sc.scrollTop = 0;
+}
+
+function goBack() {
+  if (history.length > 1) { history.pop(); var el = document.getElementById(history[history.length - 1]); if (el) { document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); }); el.classList.add('active'); } }
+  closeSheet(); closeMoreMenu();
+}
+
+function openSheet() { document.getElementById('overlay').classList.add('show'); }
+function closeSheet() { document.getElementById('overlay').classList.remove('show'); }
+
+function showToast(msg) {
+  var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(function() { t.classList.remove('show'); }, 2000);
+}
+
+function switchHomeTab(el) {
+  el.parentElement.querySelectorAll('.module-tab').forEach(t => t.classList.remove('active')); el.classList.add('active');
+}
+function switchSubTab(el) {
+  el.parentElement.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active')); el.classList.add('active');
+}
+
+function toggleMoreMenu(e, el) {
+  e.stopPropagation(); var menu = document.getElementById('moreMenu');
+  var rect = el.getBoundingClientRect(), frame = document.getElementById('app').getBoundingClientRect();
+  menu.style.top = (rect.top - frame.top + 48) + 'px'; menu.style.right = (frame.right - rect.right) + 'px'; menu.classList.toggle('show');
+}
+function closeMoreMenu() { document.getElementById('moreMenu').classList.remove('show'); }
+
+function toggleFav(btn) {
+  var id = btn.id;
+  if (favState[id]) { favState[id] = false; btn.classList.remove('favorited'); btn.innerHTML = '☆ 收藏'; showToast('已取消收藏'); }
+  else { favState[id] = true; btn.classList.add('favorited'); btn.innerHTML = '★ 已收藏'; showToast('已收藏'); }
+}
+
+function copyReferral() { showToast('内推码 BT2026XYZ 已复制到剪贴板'); }
+
+function setStars(module, count) {
+  var c = document.getElementById(module + '-stars'); if (!c) return;
+  currentStars[module] = count;
+  c.querySelectorAll('.star-btn').forEach(function(b, i) { b.classList.toggle('active', i < count); });
+  checkPublishForm(module);
+}
+
+function checkPublishForm(module) {
+  var se = document.getElementById('screen-publish-' + module); if (!se) return;
+  var btn = se.querySelector('.nav-action'); if (!btn) return;
+  var valid = false;
+  switch (module) {
+    case 'food': valid = (document.getElementById('food-restaurant')||{}).value && (currentStars['food']||0) > 0 && (document.getElementById('food-review')||{}).value; break;
+    case 'career': valid = (document.getElementById('career-company')||{}).value && (document.getElementById('career-position')||{}).value && (document.getElementById('career-expiry')||{}).value; break;
+    case 'secondhand': valid = (document.getElementById('secondhand-title')||{}).value && (document.getElementById('secondhand-price')||{}).value; break;
+    case 'rental': valid = (document.getElementById('rental-title')||{}).value && (document.getElementById('rental-area')||{}).value && (document.getElementById('rental-price')||{}).value; break;
+  }
+  btn.classList.toggle('disabled', !valid);
+}
+
+function submitPublish(module) {
+  var se = document.getElementById('screen-publish-' + module); if (!se) return;
+  var btn = se.querySelector('.nav-action'); if (!btn || btn.classList.contains('disabled')) return;
+  showToast('发布成功!'); setTimeout(function() { navigateTo('home'); }, 1500);
+}
+
+function sendCode() {
+  var phone = (document.getElementById('phone-input')||{}).value || '';
+  if (phone.length < 11) { showToast('请输入正确的手机号'); return; }
+  var btn = document.getElementById('code-btn'), sec = 60;
+  btn.textContent = sec + 's'; btn.classList.add('counting'); btn.disabled = true;
+  var timer = setInterval(function() { sec--; btn.textContent = sec + 's'; if (sec <= 0) { clearInterval(timer); btn.textContent = '重新获取'; btn.classList.remove('counting'); btn.disabled = false; } }, 1000);
+  showToast('验证码已发送');
+}
+function doLogin() {
+  if (((document.getElementById('phone-input')||{}).value||'').length < 11) { showToast('请输入正确的手机号'); return; }
+  if (((document.getElementById('code-input')||{}).value||'').length < 4) { showToast('请输入验证码'); return; }
+  showToast('登录成功'); setTimeout(function() { navigateTo('home'); }, 1000);
+}
+function sendVerifyEmail() {
+  if (!((document.getElementById('edu-email')||{}).value||'').includes('@')) { showToast('请输入正确的邮箱地址'); return; }
+  showToast('验证邮件已发送，请查收');
+  setTimeout(function() { showToast('认证成功!'); setTimeout(function() { navigateTo('profile'); }, 1000); }, 2000);
+}
+function switchProfileTab() {}
+function filterCareer(val) {
+  document.querySelectorAll('#career-list .list-item').forEach(function(item) { item.style.display = !val || item.textContent.toLowerCase().includes(val.toLowerCase()) ? '' : 'none'; });
+}
+function switchFilter(el) { el.parentElement.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); }
+function selectCat(el) { el.parentElement.querySelectorAll('.selectable').forEach(c => { c.classList.remove('selected'); c.style.boxShadow=''; }); el.classList.add('selected'); el.style.boxShadow = '0 0 0 2px var(--primary)'; }
+document.addEventListener('click', function(e) { var m = document.getElementById('moreMenu'); if (m && m.classList.contains('show') && !e.target.closest('.more-menu') && !e.target.closest('.nav-more')) m.classList.remove('show'); });
+console.log('校园通 · 高保真交互原型就绪 | 18屏');
+</script>
+
+</body></html>

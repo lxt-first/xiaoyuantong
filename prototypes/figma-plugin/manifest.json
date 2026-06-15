@@ -1,0 +1,10 @@
+﻿{
+  "name": "校园通 · 高保真原型生成器",
+  "id": "xiaoyuantong-hifi-prototype",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"]
+}
