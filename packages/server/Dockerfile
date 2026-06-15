@@ -6,6 +6,7 @@ COPY packages/server/package.json ./packages/server/package.json
 COPY tsconfig.base.json ./
 RUN npm install --ignore-scripts
 COPY . .
+RUN cd packages/server && npx prisma generate
 RUN npm run build -w packages/server
 
 FROM node:22-alpine

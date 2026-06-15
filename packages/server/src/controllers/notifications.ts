@@ -12,7 +12,7 @@ export async function getNotifications(req: Request, res: Response) {
       orderBy: { createdAt: "desc" },
       take: 50,
     });
-    return res.json({ items, unreadCount: items.filter(n => !n.read).length });
+    return res.json({ items, unreadCount: items.filter((n: { read: boolean }) => !n.read).length });
   } catch (err) {
     console.error("getNotifications error:", err);
     return res.status(500).json({ error: "获取通知失败" });

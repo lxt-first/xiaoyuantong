@@ -58,7 +58,7 @@ export async function getDashboardOverview(from: string, to: string) {
   const totalContentAll = (await Promise.all([
     prisma.referral.count(), prisma.interview.count(), prisma.rental.count(),
     prisma.secondhand.count(), prisma.foodReview.count(), prisma.exam.count(),
-  ])).reduce((a, b) => a + b, 0);
+  ])).reduce((a: number, b: number) => a + b, 0);
 
   const certifiedPublishingRate = totalUsers > 0 ? totalCertified / totalUsers : 0;
 
@@ -86,7 +86,7 @@ export async function getDashboardOverview(from: string, to: string) {
     prisma.foodReview.aggregate({ _sum: { viewCount: true } }),
     prisma.exam.aggregate({ _sum: { viewCount: true } }),
   ]);
-  const totalViews = viewCounts.reduce((sum, v) => sum + (v._sum.viewCount || 0), 0);
+  const totalViews = viewCounts.reduce((sum: number, v: { _sum: { viewCount: number | null } }) => sum + (v._sum.viewCount || 0), 0);
 
   return {
     totalUsers,
