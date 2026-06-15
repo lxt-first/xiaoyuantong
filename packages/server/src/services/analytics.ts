@@ -1,13 +1,21 @@
 ﻿import prisma from "./prisma";
 
+function chinaDateString(d: Date): string {
+  const china = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+  const y = china.getUTCFullYear();
+  const m = String(china.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(china.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function dateRange(from: string, to: string): string[] {
   const dates: string[] = [];
   const start = new Date(from + "T00:00:00.000+08:00");
   const end = new Date(to + "T23:59:59.999+08:00");
   const current = new Date(start);
   while (current <= end) {
-    dates.push(current.toISOString().slice(0, 10));
-    current.setDate(current.getDate() + 1);
+    dates.push(chinaDateString(current));
+    current.setUTCDate(current.getUTCDate() + 1);
   }
   return dates;
 }

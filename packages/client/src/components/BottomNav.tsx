@@ -5,6 +5,7 @@ const TABS = [
   { path: "/", icon: "🏠", label: "首页" },
   { path: "/module/referral", icon: "💼", label: "求职" },
   { path: "/publish", icon: "+", label: "发布", isCenter: true },
+  { path: "/dashboard", icon: "📊", label: "数据" },
   { path: "/notifications", icon: "🔔", label: "消息" },
   { path: "/profile", icon: "👤", label: "我的" },
 ];
@@ -13,6 +14,17 @@ export default function BottomNav() {
   const nav = useNavigate();
   const loc = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setIsAdmin(user.role === "admin");
+      } catch {}
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -35,9 +47,12 @@ export default function BottomNav() {
     return loc.pathname.startsWith(path);
   };
 
+  // 只对管理员显示数据看板入口
+  const visibleTabs = isAdmin ? TABS : TABS.filter(t => t.path !== "/dashboard");
+
   return (
     <nav className="bottom-nav">
-      {TABS.map((tab) =>
+      {visibleTabs.map((tab) =>
         tab.isCenter ? (
           <div
             key={tab.path}

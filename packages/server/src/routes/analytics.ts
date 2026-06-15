@@ -22,6 +22,7 @@
  */
 import { Router } from "express";
 import { getDashboard } from "../controllers/analytics";
+import { adminRequired } from "../middleware/auth";
 
 export const analyticsRouter = Router();
-analyticsRouter.get("/", getDashboard);
+analyticsRouter.get("/", adminRequired, getDashboard);

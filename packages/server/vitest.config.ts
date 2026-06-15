@@ -5,8 +5,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["src/__tests__/**/*.test.ts"],
-    setupFiles: ["src/__tests__/setup.ts"]
-    env: { DATABASE_URL: process.env.DATABASE_URL || "postgresql://xiaoyuantong:xiaoyuantong_dev@localhost:5432/xiaoyuantong" },,
+    setupFiles: ["src/__tests__/setup.ts"],
     hookTimeout: 30000,
     testTimeout: 15000,
     coverage: {

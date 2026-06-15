@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type FC } from "react";
+import { useState, useEffect, useCallback, useRef, type FC } from "react";
 import type { DashboardData, DateRangePreset } from "../types/analytics";
 import { KpiCard } from "../components/KpiCard";
 import { TrendChart } from "../components/TrendChart";
@@ -17,6 +17,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [preset, setPreset] = useState<DateRangePreset>("30d");
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -26,10 +28,13 @@ export default function Dashboard() {
       const days = preset === "7d" ? 7 : preset === "30d" ? 30 : preset === "90d" ? 90 : 365;
       const from = new Date(now.getTime() - days * 86400000).toISOString().slice(0, 10);
       const to = now.toISOString().slice(0, 10);
-      const res = await fetch(`/api/analytics?from=${from}&to=${to}`);
+      const res = await fetch(`/api/analytics?from=${from}&to=${to}`, {
+        headers: { "Authorization": "Bearer " + (localStorage.getItem("token") || "") },
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json() as DashboardData;
       setData(json);
+      setLastRefresh(new Date());
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -38,6 +43,16 @@ export default function Dashboard() {
   }, [preset]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // 每 60 秒自动刷新
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      fetchData();
+    }, 60_000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -80,6 +95,9 @@ export default function Dashboard() {
           <a href="/" style={{ textDecoration: "none", color: "#6B7280", fontSize: 13 }}>← 返回首页</a>
           <span style={{ color: "#D1D5DB" }}>|</span>
           <h1 style={{ fontSize: 16, fontWeight: 600, color: "#111827", margin: 0 }}>数据仪表盘</h1>
+          <span style={{ fontSize: 11, color: "#9CA3AF" }}>
+            更新于 {lastRefresh.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+          </span>
         </div>
         <div style={{ display: "flex", gap: 4, background: "#F3F4F6", borderRadius: 6, padding: 2 }}>
           {PRESETS.map((p) => (

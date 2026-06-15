@@ -26,6 +26,7 @@ export async function login(req: Request, res: Response) {
       phone: user.phone,
       nickname: user.nickname,
       avatar: user.avatar,
+      role: user.role,
       school: user.school,
       major: user.major,
       certified: user.certified,

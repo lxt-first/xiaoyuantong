@@ -2,8 +2,36 @@ import { PrismaClient } from "@prisma/client";
 const p = new PrismaClient();
 
 async function seed() {
-  const uids = [];
-  for (let i = 0; i < 50; i++) {
+  console.log("清理旧数据...");
+  await p.notification.deleteMany();
+  await p.report.deleteMany();
+  await p.favorite.deleteMany();
+  await p.foodReview.deleteMany();
+  await p.exam.deleteMany();
+  await p.secondhand.deleteMany();
+  await p.rental.deleteMany();
+  await p.interview.deleteMany();
+  await p.referral.deleteMany();
+  await p.image.deleteMany();
+  await p.verificationCode.deleteMany();
+  await p.user.deleteMany();
+  console.log("旧数据已清理");
+
+  // 管理员账号
+  const admin = await p.user.create({
+    data: {
+      phone: "13800000000",
+      nickname: "管理员",
+      role: "admin",
+      school: "华北理工大学",
+      certified: true,
+      eduEmail: "admin@ncst.edu.cn",
+    },
+  });
+  console.log("管理员账号已创建: 13800000000");
+
+  const uids = [admin.id];
+  for (let i = 1; i <= 50; i++) {
     const certified = i < 30;
     const data = {
       phone: '1380000' + String(i).padStart(4, '0'),

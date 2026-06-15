@@ -16,6 +16,18 @@ const ProtectedRoute: FC<{ children: ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+const AdminRoute: FC<{ children: ReactNode }> = ({ children }) => {
+  const userStr = localStorage.getItem("user");
+  if (!userStr) return <Navigate to="/login" replace />;
+  try {
+    const user = JSON.parse(userStr);
+    if (user.role !== "admin") return <Navigate to="/" replace />;
+  } catch {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+};
+
 export default function App() {
   return (
     <Routes>
@@ -28,7 +40,7 @@ export default function App() {
       <Route path="/profile/:id" element={<Profile />} />
       <Route path="/search" element={<Search />} />
       <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
       <Route path="/favorites" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     </Routes>
   );
