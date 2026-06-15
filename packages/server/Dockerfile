@@ -21,4 +21,4 @@ COPY --from=builder /app/tsconfig.base.json ./
 WORKDIR /app/packages/server
 RUN npx prisma@5.22.0 generate --schema=./prisma/schema.prisma
 EXPOSE 3001
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "npx prisma@5.22.0 db push --schema=./prisma/schema.prisma --accept-data-loss && node dist/index.js"]
